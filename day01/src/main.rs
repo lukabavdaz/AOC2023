@@ -35,5 +35,5 @@ fn part2(input: &[String]) -> u32 {
 fn main() {
     let input = get_input();
     println!("part1: {}", part1(&input));
-    println!("part2_v2: {}", part2(&input));
+    println!("part2: {}", part2(&input));
 }
