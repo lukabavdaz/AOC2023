@@ -32,11 +32,11 @@ fn part2(input: &[Vec<[u32; 3]>]) -> u32 {
     input
         .iter()
         .map(|v| {
-            v.iter().fold([0, 0, 0], |acc, x| {
-                [acc[0].max(x[0]), acc[1].max(x[1]), acc[2].max(x[2])]
+            v.iter().fold([0, 0, 0], |acc, c| {
+                [acc[0].max(c[0]), acc[1].max(c[1]), acc[2].max(c[2])]
             })
         })
-        .map(|x| x[0] * x[1] * x[2])
+        .map(|c| c[0] * c[1] * c[2])
         .sum()
 }
 
