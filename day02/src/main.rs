@@ -6,13 +6,14 @@ fn get_input() -> Vec<Vec<[u32; 3]>> {
             l.split(&[';', ':'])
                 .skip(1)
                 .map(|s| {
-                    s.split(',')
-                        .fold([0; 3], |acc, ss| match ss.trim().split_once(' ').unwrap() {
-                            (n, "red") => [acc[0] + n.parse::<u32>().unwrap(), acc[1], acc[2]],
-                            (n, "green") => [acc[0], acc[1] + n.parse::<u32>().unwrap(), acc[2]],
-                            (n, "blue") => [acc[0], acc[1], acc[2] + n.parse::<u32>().unwrap()],
+                    s.split(',').fold([0; 3], |[r, g, b], ss| {
+                        match ss.trim().split_once(' ').unwrap() {
+                            (n, "red") => [r + n.parse::<u32>().unwrap(), g, b],
+                            (n, "green") => [r, g + n.parse::<u32>().unwrap(), b],
+                            (n, "blue") => [r, g, b + n.parse::<u32>().unwrap()],
                             _ => panic!(),
-                        })
+                        }
+                    })
                 })
                 .collect()
         })
@@ -23,7 +24,7 @@ fn part1(input: &[Vec<[u32; 3]>]) -> usize {
     input
         .iter()
         .enumerate()
-        .filter(|(_, v)| v.iter().all(|c| c[0] < 13 && c[1] < 14 && c[2] < 15))
+        .filter(|(_, v)| v.iter().all(|&[r, g, b]| r < 13 && g < 14 && b < 15))
         .map(|(i, _)| i + 1)
         .sum()
 }
@@ -32,11 +33,11 @@ fn part2(input: &[Vec<[u32; 3]>]) -> u32 {
     input
         .iter()
         .map(|v| {
-            v.iter().fold([0, 0, 0], |acc, c| {
-                [acc[0].max(c[0]), acc[1].max(c[1]), acc[2].max(c[2])]
+            v.iter().fold([0; 3], |[r, g, b], &[r2, g2, b2]| {
+                [r.max(r2), g.max(g2), b.max(b2)]
             })
         })
-        .map(|c| c[0] * c[1] * c[2])
+        .map(|[r, g, b]| r * g * b)
         .sum()
 }
 
