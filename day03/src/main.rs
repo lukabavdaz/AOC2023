@@ -1,78 +1,50 @@
-fn get_input() -> Vec<Vec<char>> {
-    std::fs::read_to_string("input/input.txt")
+fn get_input() -> Vec<String> {
+    std::fs::read_to_string("input/test_input.txt")
         .unwrap()
         .lines()
-        .map(|s| s.chars().collect())
+        .map(|s| s.to_owned())
         .collect()
 }
 
-fn part1(input: &[Vec<char>]) -> u32 {
+fn part1(input: &[String]) -> u32 {
     let mut sum = 0;
     for (y, l) in input.iter().enumerate() {
-        let mut num = 0;
-        let mut symbol_found = false;
-        for (x, c) in l.iter().enumerate() {
-            if !c.is_numeric() {
-                if symbol_found {
-                    sum += num;
-                }
-                num = 0;
-                symbol_found = false;
-            } else {
-                num = num * 10 + c.to_digit(10).unwrap();
-                for j in y.saturating_sub(1)..input.len().min(y + 2) {
-                    for i in x.saturating_sub(1)..l.len().min(x + 2) {
-                        if !input[j][i].is_numeric() && input[j][i] != '.' {
-                            symbol_found = true;
-                        }
-                    }
-                }
+        let mut x: usize = 0;
+        for s in l.split(|c: char| !c.is_numeric()) {
+            if s.len() > 0
+                && (y.saturating_sub(1)..input.len().min(y + 2)).any(|j| {
+                    input[j][x.saturating_sub(1)..l.len().min(x + s.len() + 1)]
+                        .contains(|c: char| !c.is_numeric() && c != '.')
+                })
+            {
+                sum += s.parse::<u32>().unwrap();
             }
-        }
-        if symbol_found {
-            sum += num;
+            x += s.len() + 1;
         }
     }
     sum
 }
 
-fn part2(input: &[Vec<char>]) -> u32 {
+fn part2(input: &[String]) -> usize {
     let mut found = std::collections::HashMap::new();
-    let mut sum = 0;
     for (y, l) in input.iter().enumerate() {
-        let mut num = 0;
-        let mut symbol_found = None;
-        for (x, c) in l.iter().enumerate() {
-            if !c.is_numeric() {
-                if let Some(p) = symbol_found {
-                    if let Some(other) = found.get(&p) {
-                        sum += num * other;
-                    } else {
-                        found.insert(p, num);
-                    }
-                }
-                num = 0;
-                symbol_found = None;
-            } else {
-                num = num * 10 + c.to_digit(10).unwrap();
-                for j in y.saturating_sub(1)..input.len().min(y + 2) {
-                    for i in x.saturating_sub(1)..l.len().min(x + 2) {
-                        if !input[j][i].is_numeric() && input[j][i] != '.' {
-                            symbol_found = Some((i,j));
-                        }
-                    }
+        let mut x: usize = 0;
+        for s in l.split(|c: char| !c.is_numeric()) {
+            if s.len() > 0 {
+                if let Some(p) = (y.saturating_sub(1)..input.len().min(y + 2)).find_map(|j| {
+                    let slice = x.saturating_sub(1)..l.len().min(x + s.len() + 1);
+                    Some((j, x.saturating_sub(1) + input[j][slice].find('*')?))
+                }) {
+                    found.entry(p).or_insert(vec![]).push(s.parse().unwrap());
                 }
             }
-        }
-        if let Some(p) = symbol_found {
-            if let Some(other) = found.get(&p) {
-                sum += num * other;
-            } else {
-                found.insert(p, num);
-            }
+            x += s.len() + 1;
         }
     }
-    sum
+    found
+        .values()
+        .map(|v| (v.len() - 1) * v.iter().product::<usize>())
+        .sum()
 }
 
 fn main() {
@@ -80,19 +52,3 @@ fn main() {
     println!("part1: {}", part1(&input));
     println!("part2: {}", part2(&input));
 }
-
-// for s in l.split(|c: char| !c.is_numeric()) {
-// if s.is_empty() {
-// offset += 1;
-// } else {
-// let n = s.parse::<i64>().unwrap();
-// println!("{n}");
-// if (y > 0 && input[y-1][offset.saturating_sub(1)..l.len().min(offset+s.len()+1)].contains(|c: char| !c.is_numeric() && c != '.')) ||
-// dbg!(y < l.len() - 1 && input[y+1][offset.saturating_sub(1)..l.len().min(offset+s.len()+1)].contains(|c: char| !c.is_numeric() && c != '.')) ||
-// input[y][offset.saturating_sub(1)..offset].contains(|c: char| !c.is_numeric() && c != '.') ||
-// input[y][offset+s.len()..l.len().min(offset+s.len()+1)].contains(|c: char| !c.is_numeric() && c != '.') {
-// sum += n;
-// }
-// offset += s.len();
-// }
-// }
