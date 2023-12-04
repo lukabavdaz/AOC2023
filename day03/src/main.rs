@@ -1,5 +1,5 @@
 fn get_input() -> Vec<String> {
-    std::fs::read_to_string("input/test_input.txt")
+    std::fs::read_to_string("input/input.txt")
         .unwrap()
         .lines()
         .map(|s| s.to_owned())
