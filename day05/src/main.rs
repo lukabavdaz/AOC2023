@@ -12,11 +12,10 @@ fn get_input() -> Vec<Vec<Vec<usize>>> {
 }
 
 fn part1(input: &[Vec<Vec<usize>>]) -> usize {
-    let (seeds, maps) = input.split_at(1);
-    seeds[0][0]
+    input[0][0]
         .iter()
         .map(|&s| {
-            maps.iter().fold(s, |i, m| {
+            input[1..].iter().fold(s, |i, m| {
                 m.iter()
                     .find_map(|v| {
                         if v[1] <= i && i < v[1] + v[2] {
@@ -33,41 +32,32 @@ fn part1(input: &[Vec<Vec<usize>>]) -> usize {
 }
 
 fn part2(input: &[Vec<Vec<usize>>]) -> usize {
-    let (seeds, maps) = input.split_at(1);
-    let seed_pairs = seeds[0][0].chunks(2).map(|c| c.to_vec()).collect();
+    let seeds = input[0][0].chunks(2).map(|s| [s[0], s[1]]).collect();
 
-    maps.iter()
-        .fold(seed_pairs, |ranges: Vec<Vec<usize>>, m| {
-            let mut v = vec![];
-            for r in ranges {
-                let mut v_premap = vec![];
-                for m_r in m {
-                    if (r[0] + r[1]) >= m_r[1] && (m_r[1] + m_r[2]) >= r[0] {
-                        v_premap.push(vec![
-                            r[0].max(m_r[1]),
-                            (r[0] + r[1]).min(m_r[1] + m_r[2]) - r[0].max(m_r[1]),
-                        ]);
-                        v.push(vec![
-                            m_r[0] + r[0].max(m_r[1]) - m_r[1],
-                            (r[0] + r[1]).min(m_r[1] + m_r[2]) - r[0].max(m_r[1]),
+    input[1..]
+        .iter()
+        .fold(seeds, |ranges: Vec<[usize; 2]>, map| {
+            let mut mapped = vec![];
+            let same = map.iter().fold(ranges, |todo, m| {
+                let mut unmapped = vec![];
+                for r in todo {
+                    if r[0] < m[1] {
+                        unmapped.push([r[0], r[1].min(m[1] - r[0])]);
+                    }
+                    if r[0] + r[1] > m[1] && m[1] + m[2] > r[0] {
+                        mapped.push([
+                            m[0] + r[0].max(m[1]) - m[1],
+                            (r[0] + r[1]).min(m[1] + m[2]) - r[0].max(m[1]),
                         ]);
                     }
-                }
-                v_premap.sort_by(|a, b| a[0].cmp(&b[0]));
-                let mut i = r[0];
-                let mut filler = vec![];
-                for new_r in &v_premap {
-                    if i < new_r[0] {
-                        filler.push(vec![i, new_r[0] - i]);
+                    if r[0] + r[1] > m[1] + m[2] {
+                        unmapped.push([r[0].max(m[1] + m[2]), r[1].min(r[0] + r[1] - m[1] - m[2])]);
                     }
-                    i += new_r[1]
                 }
-                if i < r[0] + r[1] {
-                    filler.push(vec![i, r[0] + r[1] - i]);
-                }
-                v.extend(filler);
-            }
-            v
+                unmapped
+            });
+            mapped.extend(same);
+            mapped
         })
         .iter()
         .map(|r| r[0])
