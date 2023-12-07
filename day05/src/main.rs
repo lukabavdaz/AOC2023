@@ -31,7 +31,50 @@ fn part1(input: &[Vec<Vec<usize>>]) -> usize {
         .unwrap()
 }
 
-fn part2(input: &[Vec<Vec<usize>>]) -> usize {
+fn part2_v1(input: &[Vec<Vec<usize>>]) -> usize {
+    let seeds = input[0][0].chunks(2).map(|c| [c[0], c[1]]).collect();
+
+    input[1..]
+        .iter()
+        .fold(seeds, |ranges: Vec<[usize; 2]>, m| {
+            let mut v = vec![];
+            for r in ranges {
+                let mut v_premap = vec![];
+                for m_r in m {
+                    if (r[0] + r[1]) >= m_r[1] && (m_r[1] + m_r[2]) >= r[0] {
+                        v_premap.push([
+                            r[0].max(m_r[1]),
+                            (r[0] + r[1]).min(m_r[1] + m_r[2]) - r[0].max(m_r[1]),
+                        ]);
+                        v.push([
+                            m_r[0] + r[0].max(m_r[1]) - m_r[1],
+                            (r[0] + r[1]).min(m_r[1] + m_r[2]) - r[0].max(m_r[1]),
+                        ]);
+                    }
+                }
+                v_premap.sort_by(|a, b| a[0].cmp(&b[0]));
+                let mut i = r[0];
+                let mut filler = vec![];
+                for new_r in &v_premap {
+                    if i < new_r[0] {
+                        filler.push([i, new_r[0] - i]);
+                    }
+                    i += new_r[1]
+                }
+                if i < r[0] + r[1] {
+                    filler.push([i, r[0] + r[1] - i]);
+                }
+                v.extend(filler);
+            }
+            v
+        })
+        .iter()
+        .map(|r| r[0])
+        .min()
+        .unwrap()
+}
+
+fn part2_v2(input: &[Vec<Vec<usize>>]) -> usize {
     let seeds = input[0][0].chunks(2).map(|s| [s[0], s[1]]).collect();
 
     input[1..]
@@ -68,5 +111,8 @@ fn part2(input: &[Vec<Vec<usize>>]) -> usize {
 fn main() {
     let input = get_input();
     println!("part1: {}", part1(&input));
-    println!("part2: {}", part2(&input));
+    let t0 = std::time::Instant::now();
+    println!("part2_v1: {}, {:?}", part2_v1(&input), t0.elapsed());
+    let t0 = std::time::Instant::now();
+    println!("part2_v2: {}, {:?}", part2_v2(&input), t0.elapsed());
 }
