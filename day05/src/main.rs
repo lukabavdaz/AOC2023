@@ -31,50 +31,7 @@ fn part1(input: &[Vec<Vec<usize>>]) -> usize {
         .unwrap()
 }
 
-fn part2_v1(input: &[Vec<Vec<usize>>]) -> usize {
-    let seeds = input[0][0].chunks(2).map(|c| [c[0], c[1]]).collect();
-
-    input[1..]
-        .iter()
-        .fold(seeds, |ranges: Vec<[usize; 2]>, map| {
-            let mut mapped = vec![];
-            for r in ranges {
-                let mut unmapped = vec![];
-                for m in map {
-                    if r[0] + r[1] > m[1] && m[1] + m[2] > r[0] {
-                        unmapped.push([
-                            r[0].max(m[1]),
-                            (r[0] + r[1]).min(m[1] + m[2]) - r[0].max(m[1]),
-                        ]);
-                        mapped.push([
-                            m[0] + r[0].max(m[1]) - m[1],
-                            (r[0] + r[1]).min(m[1] + m[2]) - r[0].max(m[1]),
-                        ]);
-                    }
-                }
-                unmapped.sort_by(|a, b| a[0].cmp(&b[0]));
-                let mut i = r[0];
-                let mut filler = vec![];
-                for new_r in &unmapped {
-                    if i < new_r[0] {
-                        filler.push([i, new_r[0] - i]);
-                    }
-                    i += new_r[1]
-                }
-                if i < r[0] + r[1] {
-                    filler.push([i, r[0] + r[1] - i]);
-                }
-                mapped.extend(filler);
-            }
-            mapped
-        })
-        .iter()
-        .map(|r| r[0])
-        .min()
-        .unwrap()
-}
-
-fn part2_v2(input: &[Vec<Vec<usize>>]) -> usize {
+fn part2(input: &[Vec<Vec<usize>>]) -> usize {
     let seeds = input[0][0].chunks(2).map(|s| [s[0], s[1]]).collect();
 
     input[1..]
@@ -111,15 +68,5 @@ fn part2_v2(input: &[Vec<Vec<usize>>]) -> usize {
 fn main() {
     let input = get_input();
     println!("part1: {}", part1(&input));
-    let t0 = std::time::Instant::now();
-    for _ in 0..10000 {
-        part2_v1(&input);
-    }
-    let t1 = std::time::Instant::now();
-    for _ in 0..10000 {
-        part2_v2(&input);
-    }
-    let t2 = std::time::Instant::now();
-    println!("part2_v1: {}, {:?}", part2_v1(&input), t1 - t0);
-    println!("part2_v2: {}, {:?}", part2_v2(&input), t2 - t1);
+    println!("part2: {}", part2(&input));
 }
