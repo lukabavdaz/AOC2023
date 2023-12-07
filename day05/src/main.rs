@@ -36,26 +36,26 @@ fn part2_v1(input: &[Vec<Vec<usize>>]) -> usize {
 
     input[1..]
         .iter()
-        .fold(seeds, |ranges: Vec<[usize; 2]>, m| {
-            let mut v = vec![];
+        .fold(seeds, |ranges: Vec<[usize; 2]>, map| {
+            let mut mapped = vec![];
             for r in ranges {
-                let mut v_premap = vec![];
-                for m_r in m {
-                    if (r[0] + r[1]) >= m_r[1] && (m_r[1] + m_r[2]) >= r[0] {
-                        v_premap.push([
-                            r[0].max(m_r[1]),
-                            (r[0] + r[1]).min(m_r[1] + m_r[2]) - r[0].max(m_r[1]),
+                let mut unmapped = vec![];
+                for m in map {
+                    if r[0] + r[1] > m[1] && m[1] + m[2] > r[0] {
+                        unmapped.push([
+                            r[0].max(m[1]),
+                            (r[0] + r[1]).min(m[1] + m[2]) - r[0].max(m[1]),
                         ]);
-                        v.push([
-                            m_r[0] + r[0].max(m_r[1]) - m_r[1],
-                            (r[0] + r[1]).min(m_r[1] + m_r[2]) - r[0].max(m_r[1]),
+                        mapped.push([
+                            m[0] + r[0].max(m[1]) - m[1],
+                            (r[0] + r[1]).min(m[1] + m[2]) - r[0].max(m[1]),
                         ]);
                     }
                 }
-                v_premap.sort_by(|a, b| a[0].cmp(&b[0]));
+                unmapped.sort_by(|a, b| a[0].cmp(&b[0]));
                 let mut i = r[0];
                 let mut filler = vec![];
-                for new_r in &v_premap {
+                for new_r in &unmapped {
                     if i < new_r[0] {
                         filler.push([i, new_r[0] - i]);
                     }
@@ -64,9 +64,9 @@ fn part2_v1(input: &[Vec<Vec<usize>>]) -> usize {
                 if i < r[0] + r[1] {
                     filler.push([i, r[0] + r[1] - i]);
                 }
-                v.extend(filler);
+                mapped.extend(filler);
             }
-            v
+            mapped
         })
         .iter()
         .map(|r| r[0])
@@ -112,7 +112,14 @@ fn main() {
     let input = get_input();
     println!("part1: {}", part1(&input));
     let t0 = std::time::Instant::now();
-    println!("part2_v1: {}, {:?}", part2_v1(&input), t0.elapsed());
-    let t0 = std::time::Instant::now();
-    println!("part2_v2: {}, {:?}", part2_v2(&input), t0.elapsed());
+    for _ in 0..10000 {
+        part2_v1(&input);
+    }
+    let t1 = std::time::Instant::now();
+    for _ in 0..10000 {
+        part2_v2(&input);
+    }
+    let t2 = std::time::Instant::now();
+    println!("part2_v1: {}, {:?}", part2_v1(&input), t1 - t0);
+    println!("part2_v2: {}, {:?}", part2_v2(&input), t2 - t1);
 }
