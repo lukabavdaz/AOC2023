@@ -23,11 +23,7 @@ fn part1(input: &[(String, u64)]) -> u64 {
             acc * 13 + values.iter().position(|&x| x == c).unwrap() as u64
         })
     });
-    cards
-        .iter()
-        .enumerate()
-        .map(|(i, &(_, b))| (i + 1) as u64 * b)
-        .sum()
+    cards.iter().zip(1..).map(|(&(_, b), i)| i * b).sum()
 }
 
 fn part2(input: &[(String, u64)]) -> u64 {
@@ -45,7 +41,10 @@ fn part2(input: &[(String, u64)]) -> u64 {
         } else {
             occurrences.push(5);
         }
-        let set = occurrences.iter().map(|o| (o * o) as u64 * 1000000).sum::<u64>();
+        let set = occurrences
+            .iter()
+            .map(|o| (o * o) as u64 * 1000000)
+            .sum::<u64>();
 
         let values = [
             'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A',
@@ -54,11 +53,7 @@ fn part2(input: &[(String, u64)]) -> u64 {
             acc * 13 + values.iter().position(|&x| x == c).unwrap() as u64
         })
     });
-    cards
-        .iter()
-        .enumerate()
-        .map(|(i, &(_, b))| (i + 1) as u64 * b)
-        .sum()
+    cards.iter().zip(1..).map(|(&(_, b), i)| i * b).sum()
 }
 
 fn main() {

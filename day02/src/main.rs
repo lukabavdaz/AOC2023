@@ -23,9 +23,9 @@ fn get_input() -> Vec<Vec<[u32; 3]>> {
 fn part1(input: &[Vec<[u32; 3]>]) -> usize {
     input
         .iter()
-        .enumerate()
-        .filter(|(_, v)| v.iter().all(|&[r, g, b]| r < 13 && g < 14 && b < 15))
-        .map(|(i, _)| i + 1)
+        .zip(1..)
+        .filter(|(v, _)| v.iter().all(|&[r, g, b]| r < 13 && g < 14 && b < 15))
+        .map(|(_, i)| i)
         .sum()
 }
 

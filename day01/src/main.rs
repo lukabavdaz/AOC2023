@@ -24,11 +24,11 @@ fn part2(input: &[String]) -> u32 {
         [
             "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
         ]
-            .iter()
-            .enumerate()
-            .fold(l.clone(), |acc, (i, s)| {
-                acc.replace(s, &format!("{s}{}{s}", i + 1))
-            })
+        .iter()
+        .zip(1..)
+        .fold(l.clone(), |acc, (s, i)| {
+            acc.replace(s, &format!("{s}{}{s}", i))
+        })
     }))
 }
 
